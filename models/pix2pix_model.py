@@ -95,7 +95,7 @@ class Pix2PixModel(BaseModel):
         pred_fake = self.netD(fake_AB.detach())
         self.loss_D_fake = self.criterionGAN(pred_fake, False)
         # Real
-        np.where(real_B=0,loss_D =0)
+        #np.where(real_B=0,loss_D =0)
         real_AB = torch.cat((self.real_A, self.real_B), 1)
         pred_real = self.netD(real_AB)
         self.loss_D_real = self.criterionGAN(pred_real, True)
