@@ -2,7 +2,7 @@ import os
 from data.base_dataset import BaseDataset, get_params, get_transform
 from data.image_folder import make_dataset
 from PIL import Image
-import torch
+
 
 class AlignedDataset(BaseDataset):
     """A dataset class for paired image dataset.
@@ -45,23 +45,13 @@ class AlignedDataset(BaseDataset):
         A = AB.crop((0, 0, w2, h))
         B = AB.crop((w2, 0, w, h))
 
-        # Load the depth image corresponding to the A image
-        # Assuming depth images are stored in a folder named 'depth' in the same directory structure
-        D_path = AB_path.replace('train', 'train_depth')  # Adjust this path based on your depth image storage
-        D = Image.open(D_path).convert('L')  # Load depth image as grayscale
-
-        # apply the same transform to A, B, and D
+        # apply the same transform to both A and B
         transform_params = get_params(self.opt, A.size)
         A_transform = get_transform(self.opt, transform_params, grayscale=(self.input_nc == 1))
         B_transform = get_transform(self.opt, transform_params, grayscale=(self.output_nc == 1))
-        D_transform = get_transform(self.opt, transform_params, grayscale=True)
 
         A = A_transform(A)
         B = B_transform(B)
-        D = D_transform(D)
-
-        # Concatenate the depth channel to the RGB channels of A
-        A = torch.cat((A, D), dim=0)
 
         return {'A': A, 'B': B, 'A_paths': AB_path, 'B_paths': AB_path}
 
