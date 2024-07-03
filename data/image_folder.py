@@ -27,8 +27,9 @@ def make_dataset(dir, max_dataset_size=float("inf")):
     for root, _, fnames in sorted(os.walk(dir)):
         for fname in fnames:
             if is_image_file(fname):
-                path = os.path.join(root, fname)
-                images.append(path)
+                #path = os.path.join(root, fname)
+                relative_path = os.path.relpath(os.path.join(root, fname), dir)
+                images.append(relative_path)
     return images[:min(max_dataset_size, len(images))]
 
 
