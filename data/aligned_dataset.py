@@ -20,6 +20,10 @@ class AlignedDataset(BaseDataset):
         rgb_path = os.path.join(self.dir_AB, 'rgb', AB_path)
         depth_path = os.path.join(self.dir_AB, 'depth', AB_path)
         lidar_path = os.path.join(self.dir_AB, 'lidar', AB_path)
+        #added extra prints for debugging
+        print("RGB Path:", rgb_path)
+        print("Depth Path:", depth_path)
+        print("LiDAR Path:", lidar_path)
 
         rgb = Image.open(rgb_path).convert('RGB')
         depth = Image.open(depth_path).convert('L')
