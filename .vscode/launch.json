@@ -11,8 +11,9 @@
                 "--dataroot", "./datasets/output_pix2pix_rgbd",
                 "--name", "debugtrain",
                 "--model", "pix2pix",
-                "--direction", "AtoB"
-                "--gpu_ids", "-1"
+                "--direction", "AtoB",
+                "--gpu_ids", "-1",
+                "--display_id", "0"
             ],
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}"
