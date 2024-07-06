@@ -55,7 +55,7 @@ class AlignedDataset(BaseDataset):
         mean = [0.485, 0.456, 0.406, 0.5]  # RGB mean + depth mean
         std = [0.229, 0.224, 0.225, 0.5]   # RGB std + depth std
         A = TF.to_pil_image(A)
-        print(type(A))
+        #print(type(A))
 
         A = F.to_tensor(A)
         A = F.normalize(A, mean=mean, std=std)

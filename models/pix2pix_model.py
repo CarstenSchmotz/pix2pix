@@ -20,16 +20,17 @@ class Pix2PixModel(BaseModel):
         else:
             self.model_names = ['G']
 
-        self.netG = networks.define_G(opt.input_nc + 1, opt.output_nc, opt.ngf, opt.netG, opt.norm, not opt.no_dropout, opt.init_type, opt.init_gain, self.gpu_ids)
-
-        if self.isTrain:
-            self.netD = networks.define_D(opt.input_nc + opt.output_nc + 1, opt.ndf, opt.netD, opt.n_layers_D, opt.norm, opt.init_type, opt.init_gain, self.gpu_ids)
+        self.netG = networks.define_G(opt.input_nc , opt.output_nc, opt.ngf, opt.netG, opt.norm, not opt.no_dropout, opt.init_type, opt.init_gain, self.gpu_ids)
+        #+ 1 input_nc remove aan opt.input_nc
+        if self.isTrain: #plus 1 in in +out remove "+ opt.output_nc"
+            self.netD = networks.define_D(opt.input_nc + opt.output_nc, opt.ndf, opt.netD, opt.n_layers_D, opt.norm, opt.init_type, opt.init_gain, self.gpu_ids)
             self.criterionGAN = networks.GANLoss(opt.gan_mode).to(self.device)
             self.criterionL1 = torch.nn.L1Loss()
             self.optimizer_G = torch.optim.Adam(self.netG.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999))
             self.optimizer_D = torch.optim.Adam(self.netD.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999))
             self.optimizers.append(self.optimizer_G)
             self.optimizers.append(self.optimizer_D)
+            print(opt.input_nc + opt.output_nc, opt.ndf, opt.netD, opt.n_layers_D, "opt.input_nc + opt.output_nc, opt.ndf, opt.netD, opt.n_layers_D")
 
     def set_input(self, input):
         AtoB = self.opt.direction == 'AtoB'
