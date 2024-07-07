@@ -30,7 +30,7 @@ class Pix2PixModel(BaseModel):
             self.optimizer_D = torch.optim.Adam(self.netD.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999))
             self.optimizers.append(self.optimizer_G)
             self.optimizers.append(self.optimizer_D)
-            print(opt.input_nc + opt.output_nc, opt.ndf, opt.netD, opt.n_layers_D, "opt.input_nc + opt.output_nc, opt.ndf, opt.netD, opt.n_layers_D")
+            #print(opt.input_nc + opt.output_nc, opt.ndf, opt.netD, opt.n_layers_D, "opt.input_nc + opt.output_nc, opt.ndf, opt.netD, opt.n_layers_D")
 
     def set_input(self, input):
         AtoB = self.opt.direction == 'AtoB'
