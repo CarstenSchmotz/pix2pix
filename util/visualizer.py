@@ -32,15 +32,32 @@ def save_images(webpage, visuals, image_path, aspect_ratio=1.0, width=256, use_w
             rgb_numpy = im[:, :, :3]
             depth_numpy = im[:, :, 3]
             depth_numpy = np.expand_dims(depth_numpy, axis=2).repeat(3, axis=2)
-            im = np.concatenate((rgb_numpy, depth_numpy), axis=1)
-        image_name = '%s_%s.png' % (name, label)
-        save_path = os.path.join(image_dir, image_name)
-        util.save_image(im, save_path, aspect_ratio=aspect_ratio)
-        ims.append(image_name)
-        txts.append(label)
-        links.append(image_name)
-        if use_wandb:
-            ims_dict[label] = wandb.Image(im)
+            im_rgb = rgb_numpy
+            im_depth = depth_numpy
+            image_name_rgb = '%s_%s_rgb.png' % (name, label)
+            image_name_depth = '%s_%s_depth.png' % (name, label)
+            save_path_rgb = os.path.join(image_dir, image_name_rgb)
+            save_path_depth = os.path.join(image_dir, image_name_depth)
+            util.save_image(im_rgb, save_path_rgb, aspect_ratio=aspect_ratio)
+            util.save_image(im_depth, save_path_depth, aspect_ratio=aspect_ratio)
+            ims.append(image_name_rgb)
+            ims.append(image_name_depth)
+            txts.append(label + '_rgb')
+            txts.append(label + '_depth')
+            links.append(image_name_rgb)
+            links.append(image_name_depth)
+            if use_wandb:
+                ims_dict[label + '_rgb'] = wandb.Image(im_rgb)
+                ims_dict[label + '_depth'] = wandb.Image(im_depth)
+        else:
+            image_name = '%s_%s.png' % (name, label)
+            save_path = os.path.join(image_dir, image_name)
+            util.save_image(im, save_path, aspect_ratio=aspect_ratio)
+            ims.append(image_name)
+            txts.append(label)
+            links.append(image_name)
+            if use_wandb:
+                ims_dict[label] = wandb.Image(im)
     webpage.add_images(ims, txts, links, width=width)
     if use_wandb:
         wandb.log(ims_dict)
@@ -117,10 +134,17 @@ class Visualizer():
                         rgb_numpy = image_numpy[:, :, :3]
                         depth_numpy = image_numpy[:, :, 3]
                         depth_numpy = np.expand_dims(depth_numpy, axis=2).repeat(3, axis=2)
-                        image_numpy = np.concatenate((rgb_numpy, depth_numpy), axis=1)
-                    label_html_row += '<td>%s</td>' % label
-                    images.append(image_numpy.transpose([2, 0, 1]))
-                    idx += 1
+                        image_numpy_rgb = rgb_numpy
+                        image_numpy_depth = depth_numpy
+                        label_html_row += '<td>%s</td>' % (label + '_rgb')
+                        label_html_row += '<td>%s</td>' % (label + '_depth')
+                        images.append(image_numpy_rgb.transpose([2, 0, 1]))
+                        images.append(image_numpy_depth.transpose([2, 0, 1]))
+                        idx += 2
+                    else:
+                        label_html_row += '<td>%s</td>' % label
+                        images.append(image_numpy.transpose([2, 0, 1]))
+                        idx += 1
                     if idx % ncols == 0:
                         label_html += '<tr>%s</tr>' % label_html_row
                         label_html_row = ''
@@ -149,47 +173,38 @@ class Visualizer():
                             rgb_numpy = image_numpy[:, :, :3]
                             depth_numpy = image_numpy[:, :, 3]
                             depth_numpy = np.expand_dims(depth_numpy, axis=2).repeat(3, axis=2)
-                            image_numpy = np.concatenate((rgb_numpy, depth_numpy), axis=1)
-                        self.vis.image(image_numpy.transpose([2, 0, 1]), opts=dict(title=label),
-                                       win=self.display_id + idx)
-                        idx += 1
+                            image_numpy_rgb = rgb_numpy
+                            image_numpy_depth = depth_numpy
+                            self.vis.image(image_numpy_rgb.transpose([2, 0, 1]), opts=dict(title=label + '_rgb'),
+                                           win=self.display_id + idx)
+                            idx += 1
+                            self.vis.image(image_numpy_depth.transpose([2, 0, 1]), opts=dict(title=label + '_depth'),
+                                           win=self.display_id + idx)
+                            idx += 1
+                        else:
+                            self.vis.image(image_numpy.transpose([2, 0, 1]), opts=dict(title=label),
+                                           win=self.display_id + idx)
+                            idx += 1
                 except VisdomExceptionBase:
                     self.create_visdom_connections()
 
-        if self.use_wandb:
-            columns = [key for key, _ in visuals.items()]
-            columns.insert(0, 'epoch')
-            result_table = wandb.Table(columns=columns)
-            table_row = [epoch]
-            ims_dict = {}
-            for label, image in visuals.items():
-                image_numpy = util.tensor2im(image)
-                if label == 'input_rgb_depth':  # Handle combined input separately
-                    rgb_numpy = image_numpy[:, :, :3]
-                    depth_numpy = image_numpy[:, :, 3]
-                    depth_numpy = np.expand_dims(depth_numpy, axis=2).repeat(3, axis=2)
-                    image_numpy = np.concatenate((rgb_numpy, depth_numpy), axis=1)
-                wandb_image = wandb.Image(image_numpy)
-                table_row.append(wandb_image)
-                ims_dict[label] = wandb_image
-            self.wandb_run.log(ims_dict)
-            if epoch != self.current_epoch:
-                self.current_epoch = epoch
-                result_table.add_data(*table_row)
-                self.wandb_run.log({"Result": result_table})
-
         if self.use_html and (save_result or not self.saved):  # save images to an HTML file if they haven't been saved.
             self.saved = True
-            # save images to the disk
             for label, image in visuals.items():
                 image_numpy = util.tensor2im(image)
                 if label == 'input_rgb_depth':  # Handle combined input separately
                     rgb_numpy = image_numpy[:, :, :3]
                     depth_numpy = image_numpy[:, :, 3]
                     depth_numpy = np.expand_dims(depth_numpy, axis=2).repeat(3, axis=2)
-                    image_numpy = np.concatenate((rgb_numpy, depth_numpy), axis=1)
-                img_path = os.path.join(self.img_dir, 'epoch%.3d_%s.png' % (epoch, label))
-                util.save_image(image_numpy, img_path)
+                    image_numpy_rgb = rgb_numpy
+                    image_numpy_depth = depth_numpy
+                    img_path_rgb = os.path.join(self.img_dir, 'epoch%.3d_%s_rgb.png' % (epoch, label))
+                    img_path_depth = os.path.join(self.img_dir, 'epoch%.3d_%s_depth.png' % (epoch, label))
+                    util.save_image(image_numpy_rgb, img_path_rgb)
+                    util.save_image(image_numpy_depth, img_path_depth)
+                else:
+                    img_path = os.path.join(self.img_dir, 'epoch%.3d_%s.png' % (epoch, label))
+                    util.save_image(image_numpy, img_path)
 
             # update website
             webpage = html.HTML(self.web_dir, 'Experiment name = %s' % self.name, refresh=1)
@@ -197,10 +212,20 @@ class Visualizer():
                 webpage.add_header('epoch [%d]' % n)
                 ims, txts, links = [], [], []
                 for label, image_numpy in visuals.items():
-                    img_path = 'epoch%.3d_%s.png' % (n, label)
-                    ims.append(img_path)
-                    txts.append(label)
-                    links.append(img_path)
+                    if label == 'input_rgb_depth':  # Handle combined input separately
+                        img_path_rgb = 'epoch%.3d_%s_rgb.png' % (n, label)
+                        img_path_depth = 'epoch%.3d_%s_depth.png' % (n, label)
+                        ims.append(img_path_rgb)
+                        ims.append(img_path_depth)
+                        txts.append(label + '_rgb')
+                        txts.append(label + '_depth')
+                        links.append(img_path_rgb)
+                        links.append(img_path_depth)
+                    else:
+                        img_path = 'epoch%.3d_%s.png' % (n, label)
+                        ims.append(img_path)
+                        txts.append(label)
+                        links.append(img_path)
                 webpage.add_images(ims, txts, links, width=self.win_size)
             webpage.save()
 
