@@ -45,18 +45,20 @@ def get_option_setter(dataset_name):
 
 
 def create_dataset(opt):
-    """Create a dataset given the option.
-
-    This function wraps the class CustomDatasetDataLoader.
-        This is the main interface between this package and 'train.py'/'test.py'
-
-    Example:
-        >>> from data import create_dataset
-        >>> dataset = create_dataset(opt)
-    """
-    data_loader = CustomDatasetDataLoader(opt)
-    dataset = data_loader.load_data()
+    dataset = None
+    if opt.dataset_mode == 'aligned':
+        from data.aligned_dataset import AlignedDataset
+        dataset = AlignedDataset(opt)
+    else:
+        raise ValueError("Dataset [%s] not recognized." % opt.dataset_mode)
+    print("dataset [%s] was created" % (dataset.name()))
+    dataset = torch.utils.data.DataLoader(
+        dataset,
+        batch_size=opt.batch_size,
+        shuffle=not opt.serial_batches,
+        num_workers=int(opt.num_threads))
     return dataset
+
 
 
 class CustomDatasetDataLoader():
