@@ -36,6 +36,7 @@ def save_images(webpage, visuals, image_path, aspect_ratio=1.0, width=256, use_w
     webpage.add_header(name)
     ims, txts, links = [], [], []
     ims_dict = {}
+
     for label, im_data in visuals.items():
         im = util.tensor2im(im_data)
         if label == 'real_A':  # Handle combined input separately
@@ -43,21 +44,31 @@ def save_images(webpage, visuals, image_path, aspect_ratio=1.0, width=256, use_w
             if im.shape[2] == 4:  # Check if there are 4 channels
                 rgb_numpy = im[:, :, :3]
                 depth_numpy = im[:, :, 3]
-                depth_numpy = np.expand_dims(depth_numpy, axis=2).repeat(3, axis=2)  # Convert depth to 3 channels for visualization
+                # Debugging: Check the range of depth values
+                print("Depth min:", np.min(depth_numpy), "Depth max:", np.max(depth_numpy))
+
+                # Normalize the depth image to [0, 255] for visualization
+                depth_numpy_normalized = (depth_numpy - np.min(depth_numpy)) / (np.max(depth_numpy) - np.min(depth_numpy)) * 255
+                depth_numpy_normalized = depth_numpy_normalized.astype(np.uint8)
+                depth_numpy_3ch = np.stack([depth_numpy_normalized] * 3, axis=2)  # Convert depth to 3 channels for visualization
+                
                 im_rgb = rgb_numpy
-                im_depth = depth_numpy
+                im_depth = depth_numpy_3ch
+
                 image_name_rgb = '%s_%s_rgb.png' % (name, label)
                 image_name_depth = '%s_%s_depth.png' % (name, label)
                 save_path_rgb = os.path.join(image_dir, image_name_rgb)
                 save_path_depth = os.path.join(image_dir, image_name_depth)
                 util.save_image(im_rgb, save_path_rgb, aspect_ratio=aspect_ratio)
                 util.save_image(im_depth, save_path_depth, aspect_ratio=aspect_ratio)
+
                 ims.append(image_name_rgb)
                 ims.append(image_name_depth)
                 txts.append(label + '_rgb')
                 txts.append(label + '_depth')
                 links.append(image_name_rgb)
                 links.append(image_name_depth)
+
                 if use_wandb:
                     ims_dict[label + '_rgb'] = wandb.Image(im_rgb)
                     ims_dict[label + '_depth'] = wandb.Image(im_depth)
@@ -79,9 +90,11 @@ def save_images(webpage, visuals, image_path, aspect_ratio=1.0, width=256, use_w
             links.append(image_name)
             if use_wandb:
                 ims_dict[label] = wandb.Image(im)
+
     webpage.add_images(ims, txts, links, width=width)
     if use_wandb:
         wandb.log(ims_dict)
+
 
 class Visualizer():
     """This class includes several functions that can display/save images and print/save logging information."""
