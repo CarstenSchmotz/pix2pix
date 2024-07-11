@@ -4,7 +4,7 @@ import torch.utils.data as data
 from PIL import Image
 import torchvision.transforms as transforms
 from abc import ABC, abstractmethod
-
+import os
 
 class BaseDataset(data.Dataset, ABC):
     """This class is an abstract base class (ABC) for datasets."""
@@ -157,3 +157,14 @@ def __print_size_warning(ow, oh, w, h):
               "(%d, %d). This adjustment will be done to all images "
               "whose sizes are not multiples of 4" % (ow, oh, w, h))
         __print_size_warning.has_printed = True
+
+# Add make_dataset function here
+def make_dataset(dir, max_dataset_size=float("inf")):
+    images = []
+    assert os.path.isdir(dir), '%s is not a valid directory' % dir
+    for root, _, fnames in sorted(os.walk(dir)):
+        for fname in fnames:
+            if any(fname.endswith(extension) for extension in ['.png', '.jpg', '.jpeg']):
+                path = os.path.join(root, fname)
+                images.append(path)
+    return images[:min(max_dataset_size, len(images))]
