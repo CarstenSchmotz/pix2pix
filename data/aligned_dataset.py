@@ -1,16 +1,14 @@
 import os
-import numpy as np
 from PIL import Image
-import torch
-from data.base_dataset import BaseDataset, get_transform
+from data.base_dataset import BaseDataset, make_dataset, get_transform
 
 class AlignedDataset(BaseDataset):
     def __init__(self, opt):
         BaseDataset.__init__(self, opt)
         self.dir_A = os.path.join(opt.dataroot, 'A')  # create a path '/path/to/data/train/A'
         self.dir_B = os.path.join(opt.dataroot, 'B')  # create a path '/path/to/data/train/B'
-        self.A_paths = sorted(self.make_dataset(self.dir_A, opt.max_dataset_size))  # load images from '/path/to/data/train/A'
-        self.B_paths = sorted(self.make_dataset(self.dir_B, opt.max_dataset_size))  # load images from '/path/to/data/train/B'
+        self.A_paths = sorted(make_dataset(self.dir_A, opt.max_dataset_size))  # load images from '/path/to/data/train/A'
+        self.B_paths = sorted(make_dataset(self.dir_B, opt.max_dataset_size))  # load images from '/path/to/data/train/B'
         self.transform = get_transform(opt)
 
     def __getitem__(self, index):
