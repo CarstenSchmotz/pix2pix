@@ -28,7 +28,7 @@ def save_images(webpage, visuals, image_path, aspect_ratio=1.0, width=256, use_w
     ims_dict = {}
     for label, im_data in visuals.items():
         im = util.tensor2im(im_data)
-        if label == 'input_rgb_depth':  # Handle combined input separately
+        if label == 'real_A':  # Handle combined input separately
             rgb_numpy = im[:, :, :3]
             depth_numpy = im[:, :, 3]
             depth_numpy = np.expand_dims(depth_numpy, axis=2).repeat(3, axis=2)
@@ -130,7 +130,7 @@ class Visualizer():
                 idx = 0
                 for label, image in visuals.items():
                     image_numpy = util.tensor2im(image)
-                    if label == 'input_rgb_depth':  # Handle combined input separately
+                    if label == 'real_A':  # Handle combined input separately
                         rgb_numpy = image_numpy[:, :, :3]
                         depth_numpy = image_numpy[:, :, 3]
                         depth_numpy = np.expand_dims(depth_numpy, axis=2).repeat(3, axis=2)
@@ -169,7 +169,7 @@ class Visualizer():
                 try:
                     for label, image in visuals.items():
                         image_numpy = util.tensor2im(image)
-                        if label == 'input_rgb_depth':  # Handle combined input separately
+                        if label == 'real_A':  # Handle combined input separately
                             rgb_numpy = image_numpy[:, :, :3]
                             depth_numpy = image_numpy[:, :, 3]
                             depth_numpy = np.expand_dims(depth_numpy, axis=2).repeat(3, axis=2)
@@ -192,7 +192,7 @@ class Visualizer():
             self.saved = True
             for label, image in visuals.items():
                 image_numpy = util.tensor2im(image)
-                if label == 'input_rgb_depth':  # Handle combined input separately
+                if label == 'real_A':  # Handle combined input separately
                     rgb_numpy = image_numpy[:, :, :3]
                     depth_numpy = image_numpy[:, :, 3]
                     depth_numpy = np.expand_dims(depth_numpy, axis=2).repeat(3, axis=2)
@@ -212,7 +212,7 @@ class Visualizer():
                 webpage.add_header('epoch [%d]' % n)
                 ims, txts, links = [], [], []
                 for label, image_numpy in visuals.items():
-                    if label == 'input_rgb_depth':  # Handle combined input separately
+                    if label == 'real_A':  # Handle combined input separately
                         img_path_rgb = 'epoch%.3d_%s_rgb.png' % (n, label)
                         img_path_depth = 'epoch%.3d_%s_depth.png' % (n, label)
                         ims.append(img_path_rgb)
