@@ -36,7 +36,7 @@ class AlignedDataset(BaseDataset):
         
         combined_img = torch.cat((rgb, depth, lidar), 0)
         
-        return {'rgb': rgb, 'depth': depth, 'lidar': lidar, 'combined': combined_img, 'A_paths': rgb_path, 'B_paths': rgb_path}
+        return {'rgb': rgb, 'depth': depth, 'lidar': lidar, 'B': lidar, 'A_paths': rgb_path, 'B_paths': lidar_path}
 
     def __len__(self):
         return len(self.rgb_paths)
