@@ -29,8 +29,8 @@ def save_images(webpage, visuals, image_path, aspect_ratio=1.0, width=256, use_w
     for label, im_data in visuals.items():
         im = util.tensor2im(im_data)
         print(f"Label: {label}, Shape of im: {im.shape}")
-        print(f"Im RGB values: {im[0, :3, :5, :5]}")
-        print(f"Im Depth values: {im[0, 3, :5, :5]}")
+        #print(f"Im RGB values: {im[0, :3, :5, :5]}")
+        #print(f"Im Depth values: {im[0, 3, :5, :5]}")
         if label == 'real_A':  # Handle combined input separately
             rgb_numpy = im[:, :, :3]
             depth_numpy = im[:, :, 3]
