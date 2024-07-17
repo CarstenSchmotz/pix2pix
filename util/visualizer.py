@@ -3,6 +3,7 @@ import os
 import sys
 import ntpath
 import time
+<<<<<<< Updated upstream
 from . import util, html
 from subprocess import Popen, PIPE
 import os
@@ -14,6 +15,10 @@ from subprocess import Popen, PIPE
 from collections import OrderedDict
 from . import util, html
 from . import networks
+=======
+from . import util, html
+from subprocess import Popen, PIPE
+>>>>>>> Stashed changes
 
 
 try:
@@ -74,7 +79,11 @@ class Visualizer():
             opt -- stores all the experiment flags; needs to be a subclass of BaseOptions
         Step 1: Cache the training/test options
         Step 2: connect to a visdom server
+<<<<<<< Updated upstream
         Step 3: create an HTML object for saving HTML filters
+=======
+        Step 3: create an HTML object for saveing HTML filters
+>>>>>>> Stashed changes
         Step 4: create a logging file to store training losses
         """
         self.opt = opt  # cache the option
@@ -136,7 +145,7 @@ class Visualizer():
                 h, w = next(iter(visuals.values())).shape[:2]
                 table_css = """<style>
                         table {border-collapse: separate; border-spacing: 4px; white-space: nowrap; text-align: center}
-                        table td {width: %dpx; height: %dpx; padding: 4px; outline: 4px solid black}
+                        table td {width: % dpx; height: % dpx; padding: 4px; outline: 4px solid black}
                         </style>""" % (w, h)  # create a table css
                 # create a table of images.
                 title = self.name
@@ -146,11 +155,14 @@ class Visualizer():
                 idx = 0
                 for label, image in visuals.items():
                     image_numpy = util.tensor2im(image)
+<<<<<<< Updated upstream
                     if label == 'input_rgb_depth':  # Assuming the label for combined input is 'input_rgb_depth'
                         rgb_numpy = image_numpy[:, :, :3]
                         depth_numpy = image_numpy[:, :, 3]
                         depth_numpy = np.expand_dims(depth_numpy, axis=2).repeat(3, axis=2)
                         image_numpy = np.concatenate((rgb_numpy, depth_numpy), axis=1)
+=======
+>>>>>>> Stashed changes
                     label_html_row += '<td>%s</td>' % label
                     images.append(image_numpy.transpose([2, 0, 1]))
                     idx += 1
@@ -178,11 +190,14 @@ class Visualizer():
                 try:
                     for label, image in visuals.items():
                         image_numpy = util.tensor2im(image)
+<<<<<<< Updated upstream
                         if label == 'input_rgb_depth':  # Handle combined input separately
                             rgb_numpy = image_numpy[:, :, :3]
                             depth_numpy = image_numpy[:, :, 3]
                             depth_numpy = np.expand_dims(depth_numpy, axis=2).repeat(3, axis=2)
                             image_numpy = np.concatenate((rgb_numpy, depth_numpy), axis=1)
+=======
+>>>>>>> Stashed changes
                         self.vis.image(image_numpy.transpose([2, 0, 1]), opts=dict(title=label),
                                        win=self.display_id + idx)
                         idx += 1
@@ -197,11 +212,14 @@ class Visualizer():
             ims_dict = {}
             for label, image in visuals.items():
                 image_numpy = util.tensor2im(image)
+<<<<<<< Updated upstream
                 if label == 'input_rgb_depth':  # Handle combined input separately
                     rgb_numpy = image_numpy[:, :, :3]
                     depth_numpy = image_numpy[:, :, 3]
                     depth_numpy = np.expand_dims(depth_numpy, axis=2).repeat(3, axis=2)
                     image_numpy = np.concatenate((rgb_numpy, depth_numpy), axis=1)
+=======
+>>>>>>> Stashed changes
                 wandb_image = wandb.Image(image_numpy)
                 table_row.append(wandb_image)
                 ims_dict[label] = wandb_image
@@ -216,11 +234,14 @@ class Visualizer():
             # save images to the disk
             for label, image in visuals.items():
                 image_numpy = util.tensor2im(image)
+<<<<<<< Updated upstream
                 if label == 'input_rgb_depth':  # Handle combined input separately
                     rgb_numpy = image_numpy[:, :, :3]
                     depth_numpy = image_numpy[:, :, 3]
                     depth_numpy = np.expand_dims(depth_numpy, axis=2).repeat(3, axis=2)
                     image_numpy = np.concatenate((rgb_numpy, depth_numpy), axis=1)
+=======
+>>>>>>> Stashed changes
                 img_path = os.path.join(self.img_dir, 'epoch%.3d_%s.png' % (epoch, label))
                 util.save_image(image_numpy, img_path)
 
@@ -230,6 +251,7 @@ class Visualizer():
                 webpage.add_header('epoch [%d]' % n)
                 ims, txts, links = [], [], []
 
+<<<<<<< Updated upstream
                 for label, image in visuals.items():
                     image_numpy = util.tensor2im(image)
                     if label == 'input_rgb_depth':  # Handle combined input separately
@@ -237,6 +259,10 @@ class Visualizer():
                         depth_numpy = image_numpy[:, :, 3]
                         depth_numpy = np.expand_dims(depth_numpy, axis=2).repeat(3, axis=2)
                         image_numpy = np.concatenate((rgb_numpy, depth_numpy), axis=1)
+=======
+                for label, image_numpy in visuals.items():
+                    image_numpy = util.tensor2im(image)
+>>>>>>> Stashed changes
                     img_path = 'epoch%.3d_%s.png' % (n, label)
                     ims.append(img_path)
                     txts.append(label)
@@ -271,6 +297,7 @@ class Visualizer():
         if self.use_wandb:
             self.wandb_run.log(losses)
 
+    # losses: same format as |losses| of plot_current_losses
     def print_current_losses(self, epoch, iters, losses, t_comp, t_data):
         """print current losses on console; also save the losses to the disk
 
